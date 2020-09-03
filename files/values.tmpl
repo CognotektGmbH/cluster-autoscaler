@@ -1,0 +1,64 @@
+# Currently only `gce`, `aws`, `azure` & `spotinst` are supported
+cloudProvider: aws
+autoDiscovery:
+  enabled: true
+
+awsRegion: eu-central-1
+
+sslCertPath: /etc/ssl/certs/ca-bundle.crt
+
+serviceMonitor:
+  enabled: false
+image:
+  repository: k8s.gcr.io/cluster-autoscaler
+  tag: 1.17.1
+
+extraArgs:
+  v: 4
+  stderrthreshold: info
+  logtostderr: "true"
+  skip-nodes-with-local-storage: "false"
+  skip-nodes-with-system-pods: "false"
+  scan-interval: "30s"
+  scale-down-unneeded-time: 60m
+  scale-down-delay-after-add: 30m
+  scale-down-delay-after-delete: 10m
+  balance-similar-node-groups: "true"
+
+podDisruptionBudget: |
+  maxUnavailable: 1
+
+replicaCount: 2
+%{ if node_selectors != [] }
+nodeSelector:
+%{ for node_selector in node_selectors ~}
+  ${node_selector}: "true"
+%{ endfor ~}
+
+tolerations:
+%{ for node_selector in node_selectors ~}
+  - key: ${node_selector}
+    operator: Equal
+    value: "false"
+    effect: NoExecute
+%{ endfor ~}
+%{ endif ~}
+
+rbac:
+  create: true
+  pspEnabled: false
+  serviceAccount:
+    create: false
+
+resources:
+  limits:
+    cpu: 512m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 172Mi
+
+service:
+  servicePort: 8085
+  portName: http
+  type: ClusterIP
