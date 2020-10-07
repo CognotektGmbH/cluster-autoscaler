@@ -19,12 +19,13 @@ resource "helm_release" "cluster_autoscaler" {
   ]
 
   set {
-    type = string
+    type = "string"
     name  = "autoDiscovery.clusterName"
     value = var.cluster_id
   }
 
-  set_string {
+  set {
+    type = "string"
     name  = "rbac.serviceAccount.name"
     value = local.cluster_autoscaler_service_account_name
   }
