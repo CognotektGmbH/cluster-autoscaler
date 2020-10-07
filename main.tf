@@ -18,7 +18,8 @@ resource "helm_release" "cluster_autoscaler" {
     templatefile("${path.module}/files/values.tmpl", {node_selectors=var.node_selectors})
   ]
 
-  set_string {
+  set {
+    type = string
     name  = "autoDiscovery.clusterName"
     value = var.cluster_id
   }
